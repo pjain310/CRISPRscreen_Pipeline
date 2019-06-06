@@ -75,12 +75,13 @@ get_input() {
   done
 
   #Check for presence of required arguments (counts file, output directory, sample map file)
-  if [ ! "$counts" ] || [ ! "$output_dir" ] || [ ! "$sample_map" ]
-  then
-    echo "ERROR: Required arguments missing!"
-    print_help
-    exit 1
-  fi
+  declare -a required_opts=("counts" "output_dir" "sample_map")
+  for opt in "${required_opts[@]}"; do 
+    if [[ -z ${!opt} ]]; then 
+      echo "Missing required option \"$opt\", exiting..." 
+      exit $LINENO
+    fi
+  done
 
   #Check if output directory is already present. If present, give option to rewrite.
 	if [ -d $output_dir ]

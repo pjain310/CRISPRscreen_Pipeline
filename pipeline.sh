@@ -51,6 +51,26 @@ print_help() {
   echo "$help_message"
 }
 
+prepareDirectory() {
+  local dest=$1
+  #Check if temp directory is already present.
+	if [ -d "$dest" ]
+    #If present, give option to rewrite.
+    then
+  		echo "directory ${dest} already exists, would you like to overwrite? Reply with y/n"
+  		read answer
+  		case $answer in
+  			y) echo "Overwriting temp diectory"
+           mkdir -p ${dest};;
+  			n) echo "Folder overwrite denied, exiting pipeline"
+  				 exit 1;;
+  			\?) echo "Incorrect option specified, exiting pipeline"
+  				  exit 1;;
+  		esac
+    #If not, create temp directory
+    else mkdir ${dest}
+	fi
+}
 
 get_input() {
 	# Description: Parse input arguments and perform checks
@@ -84,19 +104,10 @@ get_input() {
   done
 
   #Check if output directory is already present. If present, give option to rewrite.
-	if [ -d $output_dir ]
-        then
-		echo "Output directory already exists, would you like to overwrite? Reply with y/n"
-		read answer
-		case $answer in
-			y) echo "Overwriting folder $output_dir in subsequent steps";;
-			n) echo "Folder overwrite denied, exiting pipeline"
-				 exit 1;;
-			\?) echo "Incorrect option specified, exiting pipeline"
-				 exit 1;;
-		esac
-	fi
-
+  if ! prepareDirectory $output_dir; then 
+    exit $LINENO
+  fi
+  
   #Check for counts file
   if [ ! -f $counts ]
   then
@@ -114,29 +125,6 @@ get_input() {
   #Export variables so that they can be used within xargs
   export counts
   export sample_map
-
-}
-
-prepare_temp () {
-  #Create temp directory
-
-  #Check if temp directory is already present.
-	if [ -d temp ]
-    #If present, give option to rewrite.
-    then
-  		echo "Temp directory already exists, would you like to overwrite? Reply with y/n"
-  		read answer
-  		case $answer in
-  			y) echo "Overwriting temp diectory"
-           mkdir -p temp;;
-  			n) echo "Folder overwrite denied, exiting pipeline"
-  				 exit 1;;
-  			\?) echo "Incorrect option specified, exiting pipeline"
-  				  exit 1;;
-  		esac
-    #If not, create temp directory
-    else mkdir temp
-	fi
 
 }
 
@@ -187,7 +175,9 @@ main() {
 	get_input "$@"
 
   #Create temp directory
-	prepare_temp
+  if ! prepareDirectory "temp"; then 
+    exit $LINENO
+  fi 
 
   #Run tools according to option specified in tools flag
   if [[ $tools == *mageckrra* ]] || [ $tools == all ]

@@ -1,0 +1,10 @@
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pychache__/
+*.pyc
+
+# R
+.Rhistory

@@ -72,26 +72,29 @@ prepareDirectory() {
 	fi
 }
 
+# global variable
+declare -xa tools
+
 get_input() {
 	# Description: Parse input arguments and perform checks
 
   #Set default values for tools
-  tools="all"
+  # use global variable
 
 	#Getopts block - will take in the arguments as inputs and assign them to variables
   while getopts "i:s:o:t:vh" option; do
-          case $option in
-                  i) counts=$OPTARG;;
-                  s) sample_map=$OPTARG;;
-                  o) output_dir=$OPTARG;;
-                  t) tools=$OPTARG;;
-                  v) v=1;;
-                  h) print_help
-	                   exit 0;;
-                  \?) echo "Invalid option."
-                      print_help
-	                    exit 1;;
-          esac
+    case $option in
+      i) counts=$OPTARG;;
+      s) sample_map=$OPTARG;;
+      o) output_dir=$OPTARG;;
+      t) tools+=($OPTARG);;
+      v) v=1;;
+      h) print_help
+          exit 0;;
+      \?) echo "Invalid option."
+          print_help
+          exit 1;;
+    esac
   done
 
   #Check for presence of required arguments (counts file, output directory, sample map file)
@@ -112,14 +115,14 @@ get_input() {
   if [ ! -f $counts ]
   then
     echo "Path to counts file incorrect or file missing. Exiting pipeline"
-    exit 1
+    exit $LINENO
   fi
 
   #Check for sample map file
   if [ ! -f $sample_map ]
   then
     echo "Path to sample map file incorrect or file missing. Exiting pipeline"
-    exit 1
+    exit $LINENO
   fi
 
   #Export variables so that they can be used within xargs
@@ -180,30 +183,15 @@ main() {
   fi 
 
   #Run tools according to option specified in tools flag
-  if [[ $tools == *mageckrra* ]] || [ $tools == all ]
-  then
-    run_mageck
+  if [[ -z $tools ]]; then 
+    tools=("mageck" "mageck_mle" "pbnpa" "cb2" "bagel")
   fi
 
-  if [[ $tools == *mageckmle* ]] || [ $tools == all ]
-  then
-    run_mageck_mle
-  fi
-
-  if [[ $tools == *pbnpa* ]] || [ $tools == all ]
-  then
-    run_pbnpa
-  fi
-
-  if [[ $tools == *cb2* ]] || [ $tools == all ]
-  then
-    run_cb2
-  fi
-
-  if [[ $tools == *bagel* ]] || [ $tools == all ]
-  then
-    run_bagel
-  fi
+  for tool in "${tools[@]}"; do
+    if ! run_${tool} ; then 
+      echo "Failed to run tool \"${tool}\"..."
+    fi
+  done
 
   #rm -r temp
 

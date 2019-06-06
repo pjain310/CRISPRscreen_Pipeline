@@ -68,7 +68,7 @@ prepareDirectory() {
   				  exit 1;;
   		esac
     #If not, create temp directory
-    else mkdir ${dest}
+    else mkdir -p ${dest}  # -p is essential when $dest contains subdirectory, such as output/results
 	fi
 }
 
@@ -139,7 +139,7 @@ run_mageck(){
   #             Third convert output to consistent format using convert_output()
   echo "Running mageckrra"
 
-  mkdir temp/mageckrra
+  mkdir -p temp/mageckrra
 
   #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
   python -c "from python_modules.sample_mapper import *; mageck_sampler(makeSampleMap('$sample_map'))" | xargs -n3 bash -c 'mageck test -k $counts -t $1 -t $2 -n temp/mageckrra/"$0"_vs_"$2"'

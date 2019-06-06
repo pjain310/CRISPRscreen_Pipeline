@@ -91,7 +91,7 @@ def CB2_sampler(sample_map):
                     f.write("{}\t{}\n".format("Base",c_name))
             for s_name in names:
                 f.write("{}\t{}\n".format(condition,s_name))
-        f.close()
+            f.close()
 
 def PBNPA_sampler(sample_map):
     '''
@@ -114,4 +114,4 @@ def PBNPA_sampler(sample_map):
                 for c_name in sample_map[cl]["name"]:
                     for s_name in names:
                         f.write("{}\t{}\n".format(c_name,s_name))
-        f.close()
+            f.close()

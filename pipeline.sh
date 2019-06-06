@@ -51,91 +51,83 @@ print_help() {
   echo "$help_message"
 }
 
-
-get_input() {
-	# Description: Parse input arguments and perform checks
-
-  #Set default values for tools
-  tools="all"
-
-	#Getopts block - will take in the arguments as inputs and assign them to variables
-  while getopts "i:s:o:t:vh" option; do
-          case $option in
-                  i) counts=$OPTARG;;
-                  s) sample_map=$OPTARG;;
-                  o) output_dir=$OPTARG;;
-                  t) tools=$OPTARG;;
-                  v) v=1;;
-                  h) print_help
-	                   exit 0;;
-                  \?) echo "Invalid option."
-                      print_help
-	                    exit 1;;
-          esac
-  done
-
-  #Check for presence of required arguments (counts file, output directory, sample map file)
-  if [ ! "$counts" ] || [ ! "$output_dir" ] || [ ! "$sample_map" ]
-  then
-    echo "ERROR: Required arguments missing!"
-    print_help
-    exit 1
-  fi
-
-  #Check if output directory is already present. If present, give option to rewrite.
-	if [ -d $output_dir ]
-        then
-		echo "Output directory already exists, would you like to overwrite? Reply with y/n"
-		read answer
-		case $answer in
-			y) echo "Overwriting folder $output_dir in subsequent steps";;
-			n) echo "Folder overwrite denied, exiting pipeline"
-				 exit 1;;
-			\?) echo "Incorrect option specified, exiting pipeline"
-				 exit 1;;
-		esac
-	fi
-
-  #Check for counts file
-  if [ ! -f $counts ]
-  then
-    echo "Path to counts file incorrect or file missing. Exiting pipeline"
-    exit 1
-  fi
-
-  #Check for sample map file
-  if [ ! -f $sample_map ]
-  then
-    echo "Path to sample map file incorrect or file missing. Exiting pipeline"
-    exit 1
-  fi
-
-  #Export variables so that they can be used within xargs
-  export counts
-  export sample_map
-
-}
-
-prepare_temp () {
-  #Create temp directory
-
+prepareDirectory() {
+  local dest=$1
   #Check if temp directory is already present.
-	if [ -d temp ]
+	if [ -d "$dest" ]
     #If present, give option to rewrite.
     then
-  		echo "Temp directory already exists, would you like to overwrite? Reply with y/n"
+  		echo "directory ${dest} already exists, would you like to overwrite? Reply with y/n"
   		read answer
   		case $answer in
   			y) echo "Overwriting temp diectory"
-           mkdir -p temp;;
+           mkdir -p ${dest};;
   			n) echo "Folder overwrite denied, exiting pipeline"
   				 exit 1;;
   			\?) echo "Incorrect option specified, exiting pipeline"
   				  exit 1;;
   		esac
     #If not, create temp directory
-    else mkdir temp
+    else mkdir -p ${dest}  # -p is essential when $dest contains subdirectory, such as output/results
 	fi
+}
+
+# global variable
+declare -xa tools
+
+get_input() {
+	# Description: Parse input arguments and perform checks
+
+  #Set default values for tools
+  # use global variable
+
+	#Getopts block - will take in the arguments as inputs and assign them to variables
+  while getopts "i:s:o:t:vh" option; do
+    case $option in
+      i) counts=$OPTARG;;
+      s) sample_map=$OPTARG;;
+      o) output_dir=$OPTARG;;
+      t) tools+=($OPTARG);;
+      v) v=1;;
+      h) print_help
+          exit 0;;
+      \?) echo "Invalid option."
+          print_help
+          exit 1;;
+    esac
+  done
+
+  #Check for presence of required arguments (counts file, output directory, sample map file)
+  declare -a required_opts=("counts" "output_dir" "sample_map")
+  for opt in "${required_opts[@]}"; do 
+    if [[ -z ${!opt} ]]; then 
+      echo "Missing required option \"$opt\", exiting..." 
+      exit $LINENO
+    fi
+  done
+
+  #Check if output directory is already present. If present, give option to rewrite.
+  if ! prepareDirectory $output_dir; then 
+    exit $LINENO
+  fi
+  
+  #Check for counts file
+  if [ ! -f $counts ]
+  then
+    echo "Path to counts file incorrect or file missing. Exiting pipeline"
+    exit $LINENO
+  fi
+
+  #Check for sample map file
+  if [ ! -f $sample_map ]
+  then
+    echo "Path to sample map file incorrect or file missing. Exiting pipeline"
+    exit $LINENO
+  fi
+
+  #Export variables so that they can be used within xargs
+  export counts
+  export sample_map
 
 }
 
@@ -150,7 +142,7 @@ run_mageck(){
   #             Third convert output to consistent format using convert_output()
   echo "Running mageckrra"
 
-  mkdir temp/mageckrra
+  mkdir -p temp/mageckrra
 
   #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
   python -c "from python_modules.sample_mapper import *; mageck_sampler(makeSampleMap('$sample_map'))" | xargs -n3 bash -c 'mageck test -k $counts -t $1 -t $2 -n temp/mageckrra/"$0"_vs_"$2"'
@@ -186,33 +178,20 @@ main() {
 	get_input "$@"
 
   #Create temp directory
-	prepare_temp
+  if ! prepareDirectory "temp"; then 
+    exit $LINENO
+  fi 
 
   #Run tools according to option specified in tools flag
-  if [[ $tools == *mageckrra* ]] || [ $tools == all ]
-  then
-    run_mageck
+  if [[ -z $tools ]]; then 
+    tools=("mageck" "mageck_mle" "pbnpa" "cb2" "bagel")
   fi
 
-  if [[ $tools == *mageckmle* ]] || [ $tools == all ]
-  then
-    run_mageck_mle
-  fi
-
-  if [[ $tools == *pbnpa* ]] || [ $tools == all ]
-  then
-    run_pbnpa
-  fi
-
-  if [[ $tools == *cb2* ]] || [ $tools == all ]
-  then
-    run_cb2
-  fi
-
-  if [[ $tools == *bagel* ]] || [ $tools == all ]
-  then
-    run_bagel
-  fi
+  for tool in "${tools[@]}"; do
+    if ! run_${tool} ; then 
+      echo "Failed to run tool \"${tool}\"..."
+    fi
+  done
 
   #rm -r temp
 

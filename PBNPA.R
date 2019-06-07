@@ -1,13 +1,42 @@
-data<-read.table("readcount-DLD1-lib1",header=TRUE)
+#!/usr/bin/env RScript
 
-R1<-data.frame(data["GENE_CLONE"],data["GENE"],data["DLD_T0"],data["DLD_ETOH_R1"])
-R2<-data.frame(data["GENE_CLONE"],data["GENE"],data["DLD_T0"],data["DLD_ETOH_R2"])
-R3<-data.frame(data["GENE_CLONE"],data["GENE"],data["DLD_T0"],data["DLD_ETOH_R3"])
+#Load required libraries
+library(PBNPA)
 
-names(R1)<-c("sgRNA","Gene","Control","DLD_ETOH_R1")
-names(R2)<-c("sgRNA","Gene","Control","DLD_ETOH_R2")
-names(R3)<-c("sgRNA","Gene","Control","DLD_ETOH_R3")
+#Read input arguments (counts table and sample map)
+args = commandArgs(trailingOnly=TRUE)
 
-dat<-list(R1,R2,R3)
+#Process sample map according to PBNPA requirements
+data<-read.table(args[1],header=TRUE)
+design_mat<-read.table(args[2],header=TRUE)
 
-results<-PBNPA(dat)
+
+dat<-list()
+control<-list()
+treatment<-list()
+
+
+for (row in 1:nrow(design_mat)){
+  Trt<-design_mat[row,"Treatment"]
+  Ctl<-design_mat[row,"Control"]
+  varname <- paste("R",row,sep="")
+
+  assign(varname,data.frame(data[,1:2],data[,Ctl],data[,Trt]))
+  temp<-get(varname)
+  dat[[row]] = temp
+  treatment[[row]] = as.character(Trt)
+  control[[row]] = as.character(Ctl)
+}
+
+count=0
+
+for (i in dat){
+  count= count+1
+  print(dim(i))
+  print(names(i))
+  names(i) <- c("sgRNA","Gene",control[count],treatment[count])
+  print(names(i))
+}
+
+print(dim(dat[[1]]))
+print(names(dat[[1]]))

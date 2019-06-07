@@ -1,3 +1,5 @@
+!#/usr/bin/python
+
 def makeSampleMap(sample_mapf):
     '''
     Prepares a dictionary which stores information about samples and their controls.
@@ -115,3 +117,5 @@ def PBNPA_sampler(sample_map):
                     for s_name in names:
                         f.write("{}\t{}\n".format(c_name,s_name))
             f.close()
+
+CB2_sampler(makeSampleMap("sample_maps/sample_map_DLD1.txt"))

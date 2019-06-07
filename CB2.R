@@ -1,11 +1,21 @@
+#!/usr/bin/env RScript
+
+#Load required libraries
 library(CB2)
-library(tibble)
 
-df_design <- tribble(~group,~sample_name,"Base","DLD_T0","EtOH","DLD_ETOH_R1","EtOH","DLD_ETOH_R2","EtOH","DLD_ETOH_R3")
-df<-read.table("readcount-DLD1-lib1",header = TRUE)
-rownames(df)<-df[,1]
-df<-df[,-c(1:2)]
+#Read input arguments (counts table and sample map)
+args = commandArgs(trailingOnly=TRUE)
 
-results<-run_estimation(df,df_design,"Base","EtOH")
+#Process sample map according to PBNPA requirements
+data<-read.table(args[1],header=TRUE)
+design_mat<-read.table(args[2],header=TRUE)
 
-write.table(results,"results_CB2.txt")
+rownames(data)<-data[,1]
+data<-data[,-c(1:2)]
+
+lvl<-levels(design_mat$group)
+
+results<-run_estimation(data,design_mat,lvl[1],lvl[2])
+
+write.table(results,file=paste("results_",lvl[1],"vs",lvl[2],".txt"),quote = FALSE)
+

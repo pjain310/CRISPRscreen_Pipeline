@@ -1,5 +1,0 @@
-Condition	Sample_Name	Control
-EtOH	DLD_ETOH_R1	T0
-EtOH	DLD_ETOH_R2
-EtOH	DLD_ETOH_R3
-T0	DLD_T0

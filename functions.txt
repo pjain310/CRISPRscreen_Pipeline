@@ -1,0 +1,54 @@
+print_help(){
+  #Description: Echo error message and exit pipeline
+}
+
+get_input(){
+  #Description: Parse input arguments and perform checks for required arguments
+}
+
+file_checker(){
+  #Description: Check for correct file/folder present
+  #Is this function required?
+}
+
+create_temp(){
+  #Description: Create temp directory and required subfolders
+}
+
+convert_output(){
+  #Description: Convert output from different software into consistent format for downstream data analysis.
+}
+
+run_mageck(){
+  #Description: Run MAGeCK-RRA on counts data, convert output to consistent format using convert_output()
+}
+
+run_mageck_mle(){
+  #Description: Run MAGeCK-MLE on counts data, convert output to consistent format using convert_output()
+}
+
+run_bagel(){
+  #Description: Run bagel on counts data, convert output to consistent format using convert_output()
+}
+
+run_cb2(){
+  #Description: Run cb2 on counts data, convert output to consistent format using convert_output()
+}
+
+run_pbnpa(){
+  #Description: Run pbnpa on counts data, convert output to consistent format using convert_output()
+}
+
+estimate_metrics(){
+  #Description: Estimate values of indiviual metrics and make plots
+}
+
+comparative_plots(){
+  #Description: Use inidiviual metrics to geenrate comparative plots
+}
+
+main(){
+  #Desctiption: Main function for logic flow. Will first generate counts or take input counts from user.
+  Subsequently, will run all tools specified by user. Once tools are run, indivisual metrics for each tool
+  will be generated and used to generate comparison metrics later.
+}

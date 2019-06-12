@@ -2,13 +2,15 @@
 
 from abc import ABC,abstractmethod
 
+
+#Defining base class which will be inherited by all tool classes - contains base function for mapping samplemap file to dict
 class base_class(ABC):
     '''Base class for all software runs with makeSampleMapDict and SampleMapper functions.'''
 
-    def __init__(self,sample_mapf,sample_map):
+    def __init__(self, sample_mapf, sample_map):
+        super().__init__()
         self.sample_mapf= sample_mapf
         self.sample_map=sample_map
-        super(base_class,self).__init__()
 
     def makeSampleMapDict(self):
         '''
@@ -37,8 +39,9 @@ class base_class(ABC):
 
     def SampleMapper(self):
         '''Placeholder function to be inherited by each class'''
-        pass
+        raise NotImplementedError()
 
+#Defining class for mageckrra - contains SampleMapper specific to tool
 class mageckrra(base_class):
 
     def SampleMapper(self):
@@ -55,8 +58,9 @@ class mageckrra(base_class):
             controls = [c for c in self.sample_map[condition]['control'] if c]
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    print(condition+"\n"+compared_samples+"\n"+",".join(self.sample_map[cl]['name']))
+                    print(condition+"\n"+cl+"\n"+compared_samples+"\n"+",".join(self.sample_map[cl]['name']))
 
+#Defining class for mageckmle - contains SampleMapper specific to tool
 class mageckmle(base_class):
 
     def SampleMapper(self):
@@ -92,6 +96,8 @@ class mageckmle(base_class):
 
         f.close()
 
+
+#Defining class for cb2 - contains SampleMapper specific to tool
 class cb2(base_class):
 
     def SampleMapper(self):
@@ -108,7 +114,7 @@ class cb2(base_class):
             controls = [c for c in self.sample_map[condition]['control'] if c]
             names = self.sample_map[condition]['name']
             if len(controls)>0:
-                f=open("cb2_df_"+condition+".txt","w")
+                f=open("temp/cb2/cb2_df_"+condition+".txt","w")
                 f.write("{}\t{}\n".format("group","sample_name"))
                 for cl in controls[0].split(","):
                     for c_name in self.sample_map[cl]["name"]:
@@ -116,7 +122,10 @@ class cb2(base_class):
                 for s_name in names:
                     f.write("{}\t{}\n".format(condition,s_name))
                 f.close()
+                print("temp/cb2/cb2_df_"+condition+".txt")
 
+
+#Defining class for pbnpa - contains SampleMapper specific to tool
 class pbnpa(base_class):
 
     def SampleMapper(self):
@@ -129,20 +138,61 @@ class pbnpa(base_class):
         '''
 
         #Create files for each condition
-        for condition in sample_map:
-            controls = [c for c in sample_map[condition]['control'] if c]
-            names = sample_map[condition]['name']
-            print(condition,controls)
+        for condition in self.sample_map:
+            controls = [c for c in self.sample_map[condition]['control'] if c]
+            names = self.sample_map[condition]['name']
             if len(controls)>0:
-                f=open("pdnpa_df_"+condition+".txt","w")
+                f=open("temp/pbnpa/pbnpa_df_"+condition+".txt","w")
                 f.write("{}\t{}\n".format("Control","Treatment"))
                 for cl in controls[0].split(","):
-                    for c_name in sample_map[cl]["name"]:
+                    for c_name in self.sample_map[cl]["name"]:
                         for s_name in names:
                             f.write("{}\t{}\n".format(c_name,s_name))
                 f.close()
+                print("temp/pbnpa/pbnpa_df_"+condition+".txt")
 
-#CB2_sampler(makeSampleMap("sample_maps/sample_map_DLD1.txt"))
-tester=mageckrra("../inputs/sample_maps/sample_map_DLD1.txt","")
-tester.makeSampleMapDict()
-tester.SampleMapper()
+#Defining class for bagel - contains SampleMapper specific to tool
+class bagel(base_class):
+
+    #Adding counts file to list of required arguments for this class (to get column indices)
+    def __init__(self,sample_mapf,sample_map,counts_file):
+        self.sample_mapf= sample_mapf
+        self.sample_map=sample_map
+        self.counts_file=counts_file
+
+    def SampleMapper(self):
+        '''
+        Prepares sample mapping according to bagel requirements
+        Args:
+             sample_map (dictionary) : Dictionary whose key is the condition and value is a dictionary containing the list of samples belonging to the condition and control group.
+        Returns:
+             print to stdout: tab separated lists of treatments and controls for each bagel run condition
+        '''
+
+        header = open(self.counts_file,"r").readline().strip().split("\t")
+
+        for condition in self.sample_map:
+            treatment_indices = []
+            compared_samples = self.sample_map[condition]['name']
+            controls = [c for c in self.sample_map[condition]['control'] if c]
+            if len(controls)>0:
+                for cl in controls[0].split(","):
+                    control_indices = []
+                    counts_header=header.copy()
+                    for cl_sample in self.sample_map[cl]['name']:
+                        control_indices.append(str(header.index(cl_sample)-1))
+                        counts_header.remove(cl_sample)
+                    cl_index=",".join(control_indices)
+                    for i in compared_samples:
+                        treatment_indices.append(str(counts_header.index(i)-1))
+                    trt_index = ",".join(treatment_indices)
+                    print("{}\n{}\n{}".format(condition+'_vs_'+cl,cl_index,trt_index))
+
+if __name__ == '__main__':
+    import sys
+    if sys.argv[1] == 'mageckrra':
+        sampler = mageckrra(*sys.argv[2:])
+
+# tester=pbnpa("../inputs/sample_maps/sample_map_DLD1.txt","")
+# tester.makeSampleMapDict()
+# tester.SampleMapper()

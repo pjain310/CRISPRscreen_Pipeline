@@ -145,7 +145,7 @@ run_mageckrra(){
   mkdir -p temp/mageckrra
 
   #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
-  python -c "from python_modules.sample_mapper import *; mageckrra=mageckrra('$sample_mapf',''); mageckrra.makeSampleMapDict(); mageckrra.SampleMapper()" | xargs -n4 bash -c "mageck test --adjust_method fdr -k $counts -t \$2 -c \$3 -n temp/mageckrra/\$0_vs_\$1"
+  python -c "from python_modules.sample_mapper import *; mageckrra=mageckrra('$sample_mapf',''); mageckrra.makeSampleMapDict(); mageckrra.SampleMapper()" | xargs -n4 bash -c "mageck test --adjust-method fdr -k $counts -t \$2 -c \$3 -n temp/mageckrra/\$0_vs_\$1"
 
   mv temp/mageckrra $output_dir/
 

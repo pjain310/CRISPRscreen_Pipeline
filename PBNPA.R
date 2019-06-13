@@ -1,4 +1,4 @@
-#!/usr/bin/env RScript
+#!/usr/local/bin/R
 
 #Load required libraries
 library(PBNPA)
@@ -10,6 +10,8 @@ args = commandArgs(trailingOnly=TRUE)
 data<-read.table(args[1],header=TRUE)
 design_mat<-read.table(args[2],header=TRUE)
 
+#get condition name for file naming
+condition <- strsplit(args[2],"_|\\.")
 
 dat<-list()
 control<-list()
@@ -17,8 +19,8 @@ treatment<-list()
 
 
 for (row in 1:nrow(design_mat)){
-  Trt<-design_mat[row,"Treatment"]
-  Ctl<-design_mat[row,"Control"]
+  Trt<-as.character(design_mat[row,"Treatment"])
+  Ctl<-as.character(design_mat[row,"Control"])
   varname <- paste("R",row,sep="")
 
   assign(varname,data.frame(data[,1:2],data[,Ctl],data[,Trt]))
@@ -26,17 +28,15 @@ for (row in 1:nrow(design_mat)){
   dat[[row]] = temp
   treatment[[row]] = as.character(Trt)
   control[[row]] = as.character(Ctl)
+  names(dat[[row]]) <- c("sgRNA","Gene",control[[row]],treatment[[row]])
 }
 
-count=0
+print("Matrix made, running PBNPA now")
 
-for (i in dat){
-  count= count+1
-  print(dim(i))
-  print(names(i))
-  names(i) <- c("sgRNA","Gene",control[count],treatment[count])
-  print(names(i))
-}
+results<-PBNPA(dat)
 
-print(dim(dat[[1]]))
-print(names(dat[[1]]))
+print(dim(results))
+
+write.table(results$pos.gene,file=paste("temp/pbnpa/results_pos_gene_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)
+write.table(results$neg.gene,file=paste("temp/pbnpa/results_neg_gene_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)
+write.table(results$final.result,file=paste("temp/pbnpa/results_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)

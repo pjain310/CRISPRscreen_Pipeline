@@ -114,15 +114,15 @@ class cb2(base_class):
             controls = [c for c in self.sample_map[condition]['control'] if c]
             names = self.sample_map[condition]['name']
             if len(controls)>0:
-                f=open("temp/cb2/cb2_df_"+condition+".txt","w")
-                f.write("{}\t{}\n".format("group","sample_name"))
                 for cl in controls[0].split(","):
+                    f=open("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt","w")
+                    f.write("{}\t{}\n".format("group","sample_name"))
                     for c_name in self.sample_map[cl]["name"]:
                         f.write("{}\t{}\n".format("Base",c_name))
-                for s_name in names:
-                    f.write("{}\t{}\n".format(condition,s_name))
-                f.close()
-                print("temp/cb2/cb2_df_"+condition+".txt")
+                    for s_name in names:
+                        f.write("{}\t{}\n".format(condition,s_name))
+                        f.close()
+                    print("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt")
 
 
 #Defining class for pbnpa - contains SampleMapper specific to tool
@@ -142,14 +142,14 @@ class pbnpa(base_class):
             controls = [c for c in self.sample_map[condition]['control'] if c]
             names = self.sample_map[condition]['name']
             if len(controls)>0:
-                f=open("temp/pbnpa/pbnpa_df_"+condition+".txt","w")
-                f.write("{}\t{}\n".format("Control","Treatment"))
                 for cl in controls[0].split(","):
+                    f=open("temp/pbnpa/pbnpa_df_"+cl+"_vs_"+condition+".txt","w")
+                    f.write("{}\t{}\n".format("Control","Treatment"))
                     for c_name in self.sample_map[cl]["name"]:
                         for s_name in names:
                             f.write("{}\t{}\n".format(c_name,s_name))
-                f.close()
-                print("temp/pbnpa/pbnpa_df_"+condition+".txt")
+                    f.close()
+                    print("temp/pbnpa/pbnpa_df_"+cl+"_vs_"+condition+".txt")
 
 #Defining class for bagel - contains SampleMapper specific to tool
 class bagel(base_class):
@@ -186,7 +186,7 @@ class bagel(base_class):
                     for i in compared_samples:
                         treatment_indices.append(str(counts_header.index(i)-1))
                     trt_index = ",".join(treatment_indices)
-                    print("{}\n{}\n{}".format(condition+'_vs_'+cl,cl_index,trt_index))
+                    print("{}\n{}\n{}".format(cl+'_vs_'+condition,cl_index,trt_index))
 
 if __name__ == '__main__':
     import sys

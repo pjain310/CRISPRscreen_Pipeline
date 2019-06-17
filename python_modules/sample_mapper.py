@@ -4,7 +4,7 @@ from abc import ABC,abstractmethod
 
 
 #Defining base class which will be inherited by all tool classes - contains base function for mapping samplemap file to dict
-class base_class(ABC):
+class sampler(ABC):
     '''Base class for all software runs with makeSampleMapDict and SampleMapper functions.'''
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
@@ -42,7 +42,7 @@ class base_class(ABC):
         raise NotImplementedError()
 
 #Defining class for mageckrra - contains SampleMapper specific to tool
-class mageckrra(base_class):
+class mageckrra(sampler):
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
         super().__init__(sample_mapf, sample_map)
@@ -65,7 +65,7 @@ class mageckrra(base_class):
                     print(condition+"\n"+cl+"\n"+compared_samples+"\n"+",".join(self.sample_map[cl]['name']))
 
 #Defining class for mageckmle - contains SampleMapper specific to tool
-class mageckmle(base_class):
+class mageckmle(sampler):
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
         super().__init__(sample_mapf, samplemap)
@@ -105,7 +105,7 @@ class mageckmle(base_class):
 
 
 #Defining class for cb2 - contains SampleMapper specific to tool
-class cb2(base_class):
+class cb2(sampler):
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
         super().__init__(sample_mapf, sample_map)
@@ -136,7 +136,7 @@ class cb2(base_class):
 
 
 #Defining class for pbnpa - contains SampleMapper specific to tool
-class pbnpa(base_class):
+class pbnpa(sampler):
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
         super().__init__(sample_mapf, sample_map)
@@ -165,7 +165,7 @@ class pbnpa(base_class):
                     print("temp/pbnpa/pbnpa_df__"+cl+"_vs_"+condition+".txt")
 
 #Defining class for bagel - contains SampleMapper specific to tool
-class bagel(base_class):
+class bagel(sampler):
 
     #Adding counts file to list of required arguments for this class (to get column indices)
     def __init__(self, sample_mapf, sample_map, counts_file,*args, **kwargs):

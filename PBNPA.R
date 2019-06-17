@@ -11,7 +11,7 @@ data<-read.table(args[1],header=TRUE)
 design_mat<-read.table(args[2],header=TRUE)
 
 #get condition name for file naming
-condition <- strsplit(args[2],"_|\\.")
+condition <- strsplit(args[2],"__|\\.")
 
 dat<-list()
 control<-list()
@@ -37,6 +37,6 @@ results<-PBNPA(dat)
 
 print(dim(results))
 
-write.table(results$pos.gene,file=paste("temp/pbnpa/results_pos_gene_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)
-write.table(results$neg.gene,file=paste("temp/pbnpa/results_neg_gene_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)
-write.table(results$final.result,file=paste("temp/pbnpa/results_pbnpa_",condition[[1]][3],".txt",sep=""),quote = FALSE)
+write.table(results$pos.gene,file=paste("temp/pbnpa/results_pos_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
+write.table(results$neg.gene,file=paste("temp/pbnpa/results_neg_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
+write.table(results$final.result,file=paste("temp/pbnpa/results_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)

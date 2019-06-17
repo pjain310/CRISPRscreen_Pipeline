@@ -7,7 +7,7 @@ from abc import ABC,abstractmethod
 class base_class(ABC):
     '''Base class for all software runs with makeSampleMapDict and SampleMapper functions.'''
 
-    def __init__(self, sample_mapf, sample_map):
+    def __init__(self, sample_mapf, sample_map, *args, **kwargs):
         super().__init__()
         self.sample_mapf= sample_mapf
         self.sample_map=sample_map
@@ -44,6 +44,10 @@ class base_class(ABC):
 #Defining class for mageckrra - contains SampleMapper specific to tool
 class mageckrra(base_class):
 
+    def __init__(self, sample_mapf, sample_map, *args, **kwargs):
+        super().__init__(sample_mapf, sample_map)
+
+
     def SampleMapper(self):
         '''
         Prepares sample mapping according to mageck-rra requirements
@@ -62,6 +66,9 @@ class mageckrra(base_class):
 
 #Defining class for mageckmle - contains SampleMapper specific to tool
 class mageckmle(base_class):
+
+    def __init__(self, sample_mapf, sample_map, *args, **kwargs):
+        super().__init__(sample_mapf, samplemap)
 
     def SampleMapper(self):
         '''
@@ -100,6 +107,9 @@ class mageckmle(base_class):
 #Defining class for cb2 - contains SampleMapper specific to tool
 class cb2(base_class):
 
+    def __init__(self, sample_mapf, sample_map, *args, **kwargs):
+        super().__init__(sample_mapf, sample_map)
+
     def SampleMapper(self):
         '''
         Prepares sample mapping according to CB2 requirements
@@ -118,15 +128,18 @@ class cb2(base_class):
                     f=open("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt","w")
                     f.write("{}\t{}\n".format("group","sample_name"))
                     for c_name in self.sample_map[cl]["name"]:
-                        f.write("{}\t{}\n".format("Base",c_name))
+                        f.write("{}\t{}\n".format(cl,c_name))
                     for s_name in names:
                         f.write("{}\t{}\n".format(condition,s_name))
-                        f.close()
+                    f.close()
                     print("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt")
 
 
 #Defining class for pbnpa - contains SampleMapper specific to tool
 class pbnpa(base_class):
+
+    def __init__(self, sample_mapf, sample_map, *args, **kwargs):
+        super().__init__(sample_mapf, sample_map)
 
     def SampleMapper(self):
         '''
@@ -143,21 +156,20 @@ class pbnpa(base_class):
             names = self.sample_map[condition]['name']
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    f=open("temp/pbnpa/pbnpa_df_"+cl+"_vs_"+condition+".txt","w")
+                    f=open("temp/pbnpa/pbnpa_df__"+cl+"_vs_"+condition+".txt","w")
                     f.write("{}\t{}\n".format("Control","Treatment"))
                     for c_name in self.sample_map[cl]["name"]:
                         for s_name in names:
                             f.write("{}\t{}\n".format(c_name,s_name))
                     f.close()
-                    print("temp/pbnpa/pbnpa_df_"+cl+"_vs_"+condition+".txt")
+                    print("temp/pbnpa/pbnpa_df__"+cl+"_vs_"+condition+".txt")
 
 #Defining class for bagel - contains SampleMapper specific to tool
 class bagel(base_class):
 
     #Adding counts file to list of required arguments for this class (to get column indices)
-    def __init__(self,sample_mapf,sample_map,counts_file):
-        self.sample_mapf= sample_mapf
-        self.sample_map=sample_map
+    def __init__(self, sample_mapf, sample_map, counts_file,*args, **kwargs):
+        super().__init__(sample_mapf, sample_map)
         self.counts_file=counts_file
 
     def SampleMapper(self):
@@ -182,16 +194,25 @@ class bagel(base_class):
                     for cl_sample in self.sample_map[cl]['name']:
                         control_indices.append(str(header.index(cl_sample)-1))
                         counts_header.remove(cl_sample)
-                    cl_index=",".join(control_indices)
                     for i in compared_samples:
                         treatment_indices.append(str(counts_header.index(i)-1))
+                    cl_index=",".join(control_indices)
                     trt_index = ",".join(treatment_indices)
                     print("{}\n{}\n{}".format(cl+'_vs_'+condition,cl_index,trt_index))
 
 if __name__ == '__main__':
     import sys
-    if sys.argv[1] == 'mageckrra':
-        sampler = mageckrra(*sys.argv[2:])
+    tool = sys.argv[1]
+    if tool == 'mageckrra':
+        sampler = mageckrra(*sys.argv[2:],'')
+    elif tool == 'pbnpa':
+        sampler = pbnpa(*sys.argv[2:],'')
+    elif tool == 'cb2':
+        sampler = cb2(*sys.argv[2:],'')
+    elif tool == 'bagel':
+        sampler = bagel(*sys.argv[2:],*sys.argv[3:],'')
+    sampler.makeSampleMapDict()
+    sampler.SampleMapper()
 
 # tester=pbnpa("../inputs/sample_maps/sample_map_DLD1.txt","")
 # tester.makeSampleMapDict()

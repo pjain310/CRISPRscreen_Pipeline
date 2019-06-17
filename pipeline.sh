@@ -8,7 +8,7 @@
 #									                                                             	#
 #Description: A methods comparison pipeline to get performance metrics for      #
 #             different pooled CRISPR screen analysis software (MAGeCK-RRA,     #
-#             MAGeCK-MLE, BAGEL, CB2, PBNPA, casTLE).                           #
+#             MAGeCK-MLE, BAGEL, CB2, PBNPA).                                   #
 #             INPUT: Read count files                                           #
 #             OUTPUT: Directory containing a list of significant gene hits,     #
 #             plots of performance metrics                                      #
@@ -52,8 +52,10 @@ print_help() {
 }
 
 prepareDirectory() {
+  #Parse input
   local dest=$1
-  #Check if temp directory is already present.
+
+  #Check if directory is already present.
 	if [ -d "$dest" ]
     #If present, give option to rewrite.
     then
@@ -67,19 +69,16 @@ prepareDirectory() {
   			\?) echo "Incorrect option specified, exiting pipeline"
   				  exit 1;;
   		esac
-    #If not, create temp directory
-    else mkdir -p ${dest}  # -p is essential when $dest contains subdirectory, such as output/results
+    #If not, create directory
+    else mkdir -p ${dest}
 	fi
 }
 
-# global variable
+#Initialise tools as a global array
 declare -xa tools
 
 get_input() {
 	# Description: Parse input arguments and perform checks
-
-  #Set default values for tools
-  # use global variable
 
 	#Getopts block - will take in the arguments as inputs and assign them to variables
   while getopts "i:s:o:t:vh" option; do
@@ -145,8 +144,9 @@ run_mageckrra(){
   mkdir -p temp/mageckrra
 
   #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
-  python python_modules/sample_mapper.py mageckrra $sample_mapf | xargs -n4 bash -c "mageck test --adjust-method fdr -k $counts -t \$2 -c \$3 -n temp/mageckrra/\$0_vs_\$1"
+  python python_modules/sample_mapper.py mageckrra $sample_mapf | xargs -n4 bash -c "mageck test --adjust-method fdr -k \$counts -t \$2 -c \$3 -n temp/mageckrra/mageck_\$0_vs_\$1"
 
+  #Move outputs to output directory
   mv temp/mageckrra $output_dir/
 
 }
@@ -186,7 +186,7 @@ run_bagel(){
   mkdir -p temp/bagel
 
   #Run bagel sampler and bagel scripts
-  python python_modules/sample_mapper.py bagel $sample_mapf $counts | xargs -n3 bash -c "BAGEL-calc_foldchange.py -i \$counts -o temp/bagel/\$0 -c \$1; BAGEL.py -i temp/bagel/\$0.foldchange -o temp/bagel/\$0_bagel -e training_essentials.txt -n training_nonessential.txt -c \$2"
+  python python_modules/sample_mapper.py bagel $sample_mapf $counts | xargs -n3 bash -c "BAGEL-calc_foldchange.py -i \$counts -o temp/bagel/\$0 -c \$1; BAGEL.py -i temp/bagel/\$0.foldchange -o temp/bagel/bagel_\$0 -e training_essentials.txt -n training_nonessential.txt -c \$2"
 
   mv temp/bagel $output_dir/
 }
@@ -215,6 +215,7 @@ main() {
     fi
   done
 
+  #Remove temp directory
   rm -r temp
 
 }

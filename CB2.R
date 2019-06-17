@@ -17,4 +17,4 @@ lvl<-levels(design_mat$group)
 
 results<-run_estimation(data,design_mat,lvl[1],lvl[2])
 
-write.table(results,file=paste("temp/cb2/results_",lvl[1],"_vs_",lvl[2],".txt",sep=""),quote = FALSE)
+write.table(results,file=paste("temp/cb2/cb2_",lvl[1],"_vs_",lvl[2],".txt",sep=""),quote = FALSE)

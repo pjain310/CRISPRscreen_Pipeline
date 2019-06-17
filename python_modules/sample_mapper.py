@@ -125,14 +125,14 @@ class cb2(sampler):
             names = self.sample_map[condition]['name']
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    f=open("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt","w")
+                    f=open("temp/cb2/df__"+condition+"_vs_"+cl+".txt","w")
                     f.write("{}\t{}\n".format("group","sample_name"))
                     for c_name in self.sample_map[cl]["name"]:
                         f.write("{}\t{}\n".format(cl,c_name))
                     for s_name in names:
                         f.write("{}\t{}\n".format(condition,s_name))
                     f.close()
-                    print("temp/cb2/cb2_df_"+cl+"_vs_"+condition+".txt")
+                    print("temp/cb2/df__"+condition+"_vs_"+cl+".txt")
 
 
 #Defining class for pbnpa - contains SampleMapper specific to tool
@@ -156,13 +156,13 @@ class pbnpa(sampler):
             names = self.sample_map[condition]['name']
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    f=open("temp/pbnpa/pbnpa_df__"+cl+"_vs_"+condition+".txt","w")
+                    f=open("temp/pbnpa/df__"+condition+"_vs_"+cl+".txt","w")
                     f.write("{}\t{}\n".format("Control","Treatment"))
                     for c_name in self.sample_map[cl]["name"]:
                         for s_name in names:
                             f.write("{}\t{}\n".format(c_name,s_name))
                     f.close()
-                    print("temp/pbnpa/pbnpa_df__"+cl+"_vs_"+condition+".txt")
+                    print("temp/pbnpa/df__"+condition+"_vs_"+cl+".txt")
 
 #Defining class for bagel - contains SampleMapper specific to tool
 class bagel(sampler):
@@ -198,7 +198,7 @@ class bagel(sampler):
                         treatment_indices.append(str(counts_header.index(i)-1))
                     cl_index=",".join(control_indices)
                     trt_index = ",".join(treatment_indices)
-                    print("{}\n{}\n{}".format(cl+'_vs_'+condition,cl_index,trt_index))
+                    print("{}\n{}\n{}".format(condition+"_vs_"+cl,cl_index,trt_index))
 
 if __name__ == '__main__':
     import sys

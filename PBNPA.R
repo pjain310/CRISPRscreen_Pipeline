@@ -37,6 +37,6 @@ results<-PBNPA(dat)
 
 print(dim(results))
 
-write.table(results$pos.gene,file=paste("temp/pbnpa/results_pos_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
-write.table(results$neg.gene,file=paste("temp/pbnpa/results_neg_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
-write.table(results$final.result,file=paste("temp/pbnpa/results_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
+write.table(results$pos.gene,file=paste("temp/pbnpa/pos_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
+write.table(results$neg.gene,file=paste("temp/pbnpa/neg_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
+write.table(results$final.result,file=paste("temp/pbnpa/pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)

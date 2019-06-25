@@ -8,7 +8,7 @@
 #									                                                             	#
 #Description: A methods comparison pipeline to get performance metrics for      #
 #             different pooled CRISPR screen analysis software (MAGeCK-RRA,     #
-#             MAGeCK-MLE, BAGEL, CB2, PBNPA).                                   #
+#             MAGeCK-MLE, CB2, PBNPA).                                          #
 #             INPUT: Read count files                                           #
 #             OUTPUT: Directory containing a list of significant gene hits,     #
 #             plots of performance metrics                                      #
@@ -17,7 +17,7 @@
 #             -c : Location of counts file	(Required)		               	      #
 #	            -o : Output directory name (Required)                         		#
 #	            -t : Comma separated list  of tools to be used (Options: mageck,  #
-#                  bagel, pbnpa,cb2). If not specified, all tools will	        #
+#                  pbnpa,cb2). If not specified, all tools will	                #
 #                  be run.                      	                         		  #
 #             -v : Verbose mode                                                 #
 #             -h : Print usage instructions				                             	#
@@ -34,7 +34,7 @@ print_help() {
 
   DESCRIPTION: A methods comparison pipeline to get performance metrics for
                different pooled CRISPR screen analysis software (MAGeCK-RRA,
-               MAGeCK-MLE, BAGEL, CB2, PBNPA).
+               MAGeCK-MLE, CB2, PBNPA).
                INPUT: Read count files or raw fastq reads
                OUTPUT: Directory containing a list of significant gene hits,
                plots of performance metrics
@@ -43,7 +43,7 @@ print_help() {
                -s : Path to sample map file
                -o : Output directory name
                -t : Comma separated list  of tools to be used (Options: mageckrra, mageckmle,
-                    bagel, pbnpa, cb2). If not specified, all tools will
+                    pbnpa, cb2). If not specified, all tools will
                     be run.
                -v : Verbose mode
                -h : Print usage instructions"
@@ -179,19 +179,19 @@ run_cb2(){
   mv temp/cb2 $output_dir/
 }
 
-run_bagel(){
-  #Description: Run bagel on counts data, convert output to consistent format using convert_output()
-  echo "Running bagel"
 
-  mkdir -p temp/bagel
+count_plots(){
+  #Description: Runs an R script to create count distribution plots and correlation matrices for samples. It uses cb2 style sample mapping
 
-  #Run bagel sampler and bagel scripts
-  python python_modules/sample_mapper.py bagel $sample_mapf $counts | xargs -n3 bash -c "BAGEL-calc_foldchange.py -i \$counts -o temp/bagel/\$0 -c \$1; BAGEL.py -i temp/bagel/\$0.foldchange -o temp/bagel/bagel_\$0 -e training_essentials.txt -n training_nonessential.txt -c \$2"
+  #Create directory within temp
+  mkdir -p temp/plots
 
-  mv temp/bagel $output_dir/
+  python python_modules/sample_mapper.py cb2 $sample_mapf | xargs -n1 bash -c "Rscript ./plot.R \$counts \$0"
+
+  #Move to output directory
+
+  mv temp/plots $output_dir/
 }
-
-
 
 main() {
 	# Function that defines the order in which functions will be called
@@ -206,7 +206,7 @@ main() {
 
   #Run tools according to option specified in tools flag
   if [[ -z $tools ]]; then
-    tools=("mageckrra" "mageck_mle" "pbnpa" "cb2" "bagel")
+    tools=("mageckrra" "mageck_mle" "pbnpa" "cb2")
   fi
 
   touch $output_dir/runtime.log
@@ -221,10 +221,13 @@ main() {
     echo "Runtime for \"${tool}\": \"${runtime}\"" >> $output_dir/runtime.log
   done
 
+  #Create initial plots for counts matrix
+  count_plots
+
   #Remove temp directory
   rm -r temp
-
 }
+
 
 # Calling the main function
 main "$@"

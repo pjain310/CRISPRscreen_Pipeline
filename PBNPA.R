@@ -31,11 +31,7 @@ for (row in 1:nrow(design_mat)){
   names(dat[[row]]) <- c("sgRNA","Gene",control[[row]],treatment[[row]])
 }
 
-print("Matrix made, running PBNPA now")
-
 results<-PBNPA(dat)
-
-print(dim(results))
 
 write.table(results$pos.gene,file=paste("temp/pbnpa/pos_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)
 write.table(results$neg.gene,file=paste("temp/pbnpa/neg_gene_pbnpa_",condition[[1]][2],".txt",sep=""),quote = FALSE)

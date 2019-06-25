@@ -209,10 +209,16 @@ main() {
     tools=("mageckrra" "mageck_mle" "pbnpa" "cb2" "bagel")
   fi
 
+  touch $output_dir/runtime.log
+
   for tool in "${tools[@]}"; do
+    start=`date +%s`
     if ! run_${tool} ; then
       echo "Failed to run tool \"${tool}\"..."
     fi
+    end=`date +%s`
+    runtime=$((end-start))
+    echo "Runtime for \"${tool}\": \"${runtime}\"" >> $output_dir/runtime.log
   done
 
   #Remove temp directory

@@ -1,5 +1,4 @@
 #Load required libraries
-library(CB2)
 library(tibble)
 library(magrittr)
 library(dplyr)
@@ -7,8 +6,6 @@ library(ggplot2)
 
 #Read input arguments (counts table and sample map)
 args = commandArgs(trailingOnly=TRUE)
-file_1<-read.table(args[1],header=TRUE)
-file_2<-read.table(args[2],header=TRUE)
 
 #Define functions to get counts
 counts_design <- function (sgcount, df_design)
@@ -48,16 +45,19 @@ plot_heatmap <- function (sgcount, df_design, cor_method = "spearman")
   pheatmap::pheatmap(display_numbers = T, number_format = "%.2f", number_color = "snow1",color = colorRampPalette(c("royalblue4", "firebrick1"))(100), annotation_colors = ann_colors, annotation_col = df_design %>% tibble::column_to_rownames("sample_name") %>% dplyr::select_("group"))
 }
 
+#Read in files
+print(args)
 
-data=read.table(file_1,header=TRUE)
-df_design=read.table(file_2,header=TRUE)
+data=read.table(args[1],header=TRUE)
+df_design=read.table(args[2],header=TRUE)
 
+#Manipulate data according to function requirements
 rownames(data)<-data[,1]
 data<-data[,-c(1:2)]
 data <- data[as.character(df_design$sample_name)]
 
 #Filename for outputs
-lvl<-levels(design_mat$group)
+lvl<-levels(df_design$group)
 count_dist_file=paste("temp/plots/count_distribution_",lvl[2],"_vs_",lvl[1],".png",sep="")
 corr_matrix_file=paste("temp/plots/corr_matrix_",lvl[2],"_vs_",lvl[1],".png",sep="")
 

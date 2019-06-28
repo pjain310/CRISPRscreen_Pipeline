@@ -8,3 +8,6 @@ __pychache__/
 
 # R
 .Rhistory
+
+#Mac Specific
+.DS_Store

@@ -125,14 +125,14 @@ class cb2(sampler):
             names = self.sample_map[condition]['name']
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    f=open("temp/cb2/df__"+condition+"_vs_"+cl+".txt","w")
+                    f=open("temp/sample_maps/cb2_df__"+condition+"_vs_"+cl+".txt","w")
                     f.write("{}\t{}\n".format("group","sample_name"))
                     for c_name in self.sample_map[cl]["name"]:
                         f.write("{}\t{}\n".format(cl,c_name))
                     for s_name in names:
                         f.write("{}\t{}\n".format(condition,s_name))
                     f.close()
-                    print("temp/cb2/df__"+condition+"_vs_"+cl+".txt")
+                    print("temp/sample_maps/cb2_df__"+condition+"_vs_"+cl+".txt")
 
 
 #Defining class for pbnpa - contains SampleMapper specific to tool
@@ -156,13 +156,13 @@ class pbnpa(sampler):
             names = self.sample_map[condition]['name']
             if len(controls)>0:
                 for cl in controls[0].split(","):
-                    f=open("temp/pbnpa/df__"+condition+"_vs_"+cl+".txt","w")
+                    f=open("temp/sample_maps/pbnpa_df__"+condition+"_vs_"+cl+".txt","w")
                     f.write("{}\t{}\n".format("Control","Treatment"))
                     for c_name in self.sample_map[cl]["name"]:
                         for s_name in names:
                             f.write("{}\t{}\n".format(c_name,s_name))
                     f.close()
-                    print("temp/pbnpa/df__"+condition+"_vs_"+cl+".txt")
+                    print("temp/sample_maps/pbnpa_df__"+condition+"_vs_"+cl+".txt")
 
 #Defining class for bagel - contains SampleMapper specific to tool
 class bagel(sampler):

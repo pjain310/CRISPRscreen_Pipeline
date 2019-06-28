@@ -204,6 +204,11 @@ main() {
     exit $LINENO
   fi
 
+  #Create sample map directory within temp
+  if ! prepareDirectory "temp/sample_maps"; then
+    exit $LINENO
+  fi
+
   #Run tools according to option specified in tools flag
   if [[ -z $tools ]]; then
     tools=("mageckrra" "mageck_mle" "pbnpa" "cb2")

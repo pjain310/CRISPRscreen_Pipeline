@@ -68,7 +68,7 @@ class mageckrra(sampler):
 class mageckmle(sampler):
 
     def __init__(self, sample_mapf, sample_map, *args, **kwargs):
-        super().__init__(sample_mapf, samplemap)
+        super().__init__(sample_mapf, sample_map)
 
     def SampleMapper(self):
         '''
@@ -78,16 +78,15 @@ class mageckmle(sampler):
         Returns:
              design table file
         '''
-
         conditions=list(self.sample_map.keys())
 
         #Open design table file
-        f=open("dm_mageck_mle.txt","w")
+        f=open("temp/sample_maps/mle_df__conditions_vs_control.txt","w")
 
         #Write header
-        f.write("Sample\tBaseline\t"+"\t".join(conditions)+"\n")
+        f.write("Sample\t"+"\t".join(conditions)+"\n")
 
-        num_conditions=len(conditions)
+        num_conditions=len(conditions)-1 #Assuming only one control per condition (naive)
         i=0
 
         #Write condition values for each of the samples
@@ -95,7 +94,7 @@ class mageckmle(sampler):
             controls = [c for c in self.sample_map[condition]['control'] if c]
             names = self.sample_map[condition]['name']
             if len(controls)>0:
-                for cl in controls:
+                for cl in self.sample_map[controls[0]]['name']:
                     f.write(cl+"\t1"+"\t0"*num_conditions+"\n")
                 for name in names:
                     f.write(name+"\t1"+"\t0"*(i)+"\t1"+"\t0"*(num_conditions-i-1)+"\n")
@@ -103,6 +102,8 @@ class mageckmle(sampler):
 
         f.close()
 
+        print("temp/sample_maps/mle_df__conditions_vs_"+controls[0]+".txt")
+        print(controls[0])
 
 #Defining class for cb2 - contains SampleMapper specific to tool
 class cb2(sampler):
@@ -205,12 +206,12 @@ if __name__ == '__main__':
     tool = sys.argv[1]
     if tool == 'mageckrra':
         sampler = mageckrra(*sys.argv[2:],'')
+    elif tool == 'mageckmle':
+        sampler = mageckmle(*sys.argv[2:],'')
     elif tool == 'pbnpa':
         sampler = pbnpa(*sys.argv[2:],'')
     elif tool == 'cb2':
         sampler = cb2(*sys.argv[2:],'')
-    elif tool == 'bagel':
-        sampler = bagel(*sys.argv[2:],*sys.argv[3:],'')
     sampler.makeSampleMapDict()
     sampler.SampleMapper()
 

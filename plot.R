@@ -42,12 +42,10 @@ plot_heatmap <- function (sgcount, df_design, cor_method = "spearman")
   ann_colors <- list(group = c("#7FC97F","#BEAED4"))
   names(ann_colors$group) = as.character(levels(df_design$group))
   sgcount %>% cor(method = cor_method) %>%
-  pheatmap::pheatmap(display_numbers = T, number_format = "%.2f", number_color = "snow1",color = colorRampPalette(c("royalblue4", "firebrick1"))(100), annotation_colors = ann_colors, annotation_col = df_design %>% tibble::column_to_rownames("sample_name") %>% dplyr::select_("group"))
+  pheatmap::pheatmap(display_numbers = T, number_format = "%.2f", number_color = "snow1",color = colorRampPalette(c("royalblue4", "firebrick1"))(100), annotation_colors = ann_colors, annotation_col = df_design %>% tibble::column_to_rownames("sample_name") %>% dplyr::select("group"))
 }
 
 #Read in files
-print(args)
-
 data=read.table(args[1],header=TRUE)
 df_design=read.table(args[2],header=TRUE)
 

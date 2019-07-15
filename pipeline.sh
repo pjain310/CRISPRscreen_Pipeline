@@ -151,9 +151,19 @@ run_mageckrra(){
 
 }
 
-run_mageck_mle(){
+run_mageckmle(){
   #Description: Run MAGeCK-MLE on counts data, convert output to consistent format using convert_output()
   echo "Running mageck mle"
+
+  mkdir -p temp/mageckmle
+
+  #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
+  python python_modules/sample_mapper.py mageckmle $sample_mapf | xargs -n2 bash -c "mageck mle --adjust-method fdr -k \$counts --threads 8 -d \$0 -n temp/mageckmle/mle_condition_vs_\$1"
+
+  #Move outputs to output directory
+  mv temp/mageckmle $output_dir/
+
+
 }
 
 run_pbnpa(){
@@ -211,7 +221,7 @@ main() {
 
   #Run tools according to option specified in tools flag
   if [[ -z $tools ]]; then
-    tools=("mageckrra" "mageck_mle" "pbnpa" "cb2")
+    tools=("mageckrra" "mageckmle" "pbnpa" "cb2")
   fi
 
   touch $output_dir/runtime.log

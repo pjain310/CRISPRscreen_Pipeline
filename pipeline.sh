@@ -144,7 +144,7 @@ run_mageckrra(){
   mkdir -p temp/mageckrra
 
   #mageck sampler prints appropriate args from the sample_map to be fed to mageck test
-  python python_modules/sample_mapper.py mageckrra $sample_mapf | xargs -n4 bash -c "mageck test --gene-test-fdr-threshold 0.5 --adjust-method fdr -k \$counts -t \$2 -c \$3 -n temp/mageckrra/mageck_\$0_vs_\$1"
+  python python_modules/sample_mapper.py mageckrra $sample_mapf | xargs -n4 bash -c "mageck test --adjust-method fdr -k \$counts -t \$2 -c \$3 -n temp/mageckrra/mageck_\$0_vs_\$1"
 
   #Move outputs to output directory
   mv temp/mageckrra $output_dir/

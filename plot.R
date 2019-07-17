@@ -3,6 +3,7 @@ library(tibble)
 library(magrittr)
 library(dplyr)
 library(ggplot2)
+library(ineq)
 
 #Read input arguments (counts table and sample map)
 args = commandArgs(trailingOnly=TRUE)
@@ -43,6 +44,15 @@ plot_heatmap <- function (sgcount, df_design, cor_method = "spearman")
   names(ann_colors$group) = as.character(levels(df_design$group))
   sgcount %>% cor(method = cor_method) %>%
   pheatmap::pheatmap(display_numbers = T, number_format = "%.2f", number_color = "snow1",color = colorRampPalette(c("royalblue4", "firebrick1"))(100), annotation_colors = ann_colors, annotation_col = df_design %>% tibble::column_to_rownames("sample_name") %>% dplyr::select("group"))
+}
+
+calc_gini <- function(sgcount, df_design){
+  
+  counts_control <- c(as.matrix(data[grepl("Control",names(sgcount))]))
+  gini_control <- ineq(counts_control, type = "Gini")
+  
+  counts_condn <- c(as.matrix(data[grepl("Condn",names(sgcount))]))
+  gini_condn <- ineq(counts_condn, type = "Gini")
 }
 
 #Read in files

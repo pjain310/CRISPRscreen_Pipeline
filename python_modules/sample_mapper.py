@@ -102,7 +102,7 @@ class mageckmle(sampler):
 
         f.close()
 
-        print("temp/sample_maps/mle_df__conditions_vs_"+controls[0]+".txt")
+        print("temp/sample_maps/mle_df__conditions_vs_control.txt")
         print(controls[0])
 
 #Defining class for cb2 - contains SampleMapper specific to tool

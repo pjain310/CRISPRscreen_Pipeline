@@ -13,13 +13,13 @@
 #             OUTPUT: Directory containing a list of significant gene hits,     #
 #             plots of performance metrics                                      #
 #										                                                            #
-#Arguments:   -i : Location of reads file directory (Required)                  #
-#             -c : Location of counts file	(Required)		               	      #
+#Arguments:   -i : Location of counts file (Required)                           #
+#             -s : Path to sample map file (Required)                           #
 #	            -o : Output directory name (Required)                         		#
-#	            -t : Comma separated list  of tools to be used (Options: mageck,  #
-#                  pbnpa,cb2). If not specified, all tools will	                #
+#	            -t : Tool to be used. Use flag separately for each tool you want  #
+#                  to use (Options: mageck, mageckmle, pbnpa,cb2).              #
+#                  If not specified, all tools will	                            #
 #                  be run.                      	                         		  #
-#             -v : Verbose mode                                                 #
 #             -h : Print usage instructions				                             	#
 #										                                                            #
 #Author:      Prerna Jain						                                           	#
@@ -30,7 +30,7 @@ print_help() {
   #Description: Prints usage and help when called
 
   help_message="
-  USAGE:       pipeline.sh <add input args here>
+  USAGE:       pipeline.sh -i <input counts file> -s <sample map file> -o <output directory> [-t <tool 1> -t <tool 2>]
 
   DESCRIPTION: A methods comparison pipeline to get performance metrics for
                different pooled CRISPR screen analysis software (MAGeCK-RRA,
@@ -39,13 +39,12 @@ print_help() {
                OUTPUT: Directory containing a list of significant gene hits,
                plots of performance metrics
 
-  ARGUMENTS:   -i : Path to counts file
-               -s : Path to sample map file
-               -o : Output directory name
-               -t : Comma separated list  of tools to be used (Options: mageckrra, mageckmle,
+  ARGUMENTS:   -i : Path to counts file (Required)
+               -s : Path to sample map file (Required)
+               -o : Output directory name (Required)
+               -t : Tool to be used. Use flag separately for each tool you want (Options: mageckrra, mageckmle,
                     pbnpa, cb2). If not specified, all tools will
                     be run.
-               -v : Verbose mode
                -h : Print usage instructions"
 
   echo "$help_message"
@@ -81,13 +80,12 @@ get_input() {
 	# Description: Parse input arguments and perform checks
 
 	#Getopts block - will take in the arguments as inputs and assign them to variables
-  while getopts "i:s:o:t:vh" option; do
+  while getopts "i:s:o:t:h" option; do
     case $option in
       i) counts=$OPTARG;;
       s) sample_mapf=$OPTARG;;
       o) output_dir=$OPTARG;;
       t) tools+=($OPTARG);;
-      v) v=1;;
       h) print_help
           exit 0;;
       \?) echo "Invalid option."
@@ -130,10 +128,6 @@ get_input() {
 
 }
 
-convert_output(){
-  #Description: Convert output from different software into consistent format for downstream data analysis.
-  echo "Op converter"
-}
 
 run_mageckrra(){
   #Description: First, use sample_mapper functions to convert sample map into appropriate format for software.
@@ -172,7 +166,7 @@ run_pbnpa(){
 
   mkdir -p temp/pbnpa
 
-  python python_modules/sample_mapper.py pbnpa $sample_mapf  | xargs -n1 bash -c "Rscript ./PBNPA.R \$counts \$0"
+  python python_modules/sample_mapper.py pbnpa $sample_mapf  | xargs -n1 bash -c "Rscript ./R_scripts/PBNPA.R \$counts \$0"
 
   mv temp/pbnpa $output_dir/
 }
@@ -184,7 +178,7 @@ run_cb2(){
   mkdir -p temp/cb2
 
   #Run cb2 sampler and cb2 R script
-  python python_modules/sample_mapper.py cb2 $sample_mapf | xargs -n1 bash -c "Rscript ./CB2.R \$counts \$0"
+  python python_modules/sample_mapper.py cb2 $sample_mapf | xargs -n1 bash -c "Rscript ./R_scripts/CB2.R \$counts \$0"
 
   mv temp/cb2 $output_dir/
 }
@@ -196,7 +190,7 @@ count_plots(){
   #Create directory within temp
   mkdir -p temp/plots
 
-  python python_modules/sample_mapper.py cb2 $sample_mapf | xargs -n1 bash -c "Rscript ./plot.R \$counts \$0"
+  python python_modules/sample_mapper.py cb2 $sample_mapf | xargs -n1 bash -c "Rscript ./R_scripts/plot.R \$counts \$0"
 
   #Move to output directory
 
@@ -237,7 +231,7 @@ main() {
   done
 
   #Create initial plots for counts matrix
-  count_plots
+  #count_plots
 
   #Remove temp directory
   rm -r temp

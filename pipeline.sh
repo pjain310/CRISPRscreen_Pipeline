@@ -231,7 +231,7 @@ main() {
   done
 
   #Create initial plots for counts matrix
-  #count_plots
+  count_plots
 
   #Remove temp directory
   rm -r temp

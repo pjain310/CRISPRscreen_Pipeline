@@ -9,7 +9,16 @@ This pipeline has the following software requirements:
 
 1. Python version 3.x
 2. R version 3.5 or higher
-3. 
+3. R packages:
+   3.1 PBNPA
+   3.2 CB2
+   3.3 tibble
+   3.4 magrittr
+   3.5 dplyr
+   3.6 ggplot2
+   3.7 ineq
+   3.8 VennDiagram
+4. Mageck version 0.5+
 
 
 ```
